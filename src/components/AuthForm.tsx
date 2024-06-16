@@ -15,7 +15,7 @@ const AuthForm: React.FC<AuthFormProps> = ({ type }) => {
                     <input type="email" className={styles.input} placeholder="you@example.com" />
                 </label>
                 <label className={styles.label}>
-                    Password
+                    Passwords
                     <input type="password" className={styles.input} placeholder="••••••••" />
                 </label>
                 <button type="submit" className={styles.button}>
