@@ -1,7 +1,7 @@
 import React from 'react';
-import './globals.css';
+import '../styles/globals.css';
 
-const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+const layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     return (
         <html lang="en">
             <head>
@@ -12,4 +12,4 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     );
 };
 
-export default Layout;
+export default layout;
