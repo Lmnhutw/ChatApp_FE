@@ -1,8 +1,8 @@
-import AuthForm from "../components/AuthForm";
+import Login from "../components/Auth/Login";
 
 
 const Page: React.FC = () => {
-  return <AuthForm type="login" />;
+  return <Login type="login" />;
 };
 export default Page;
 

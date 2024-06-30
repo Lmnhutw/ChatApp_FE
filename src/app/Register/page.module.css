@@ -1,0 +1,52 @@
+.container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+    text-align: center;
+    color: #fff;
+}
+.link:hover {
+    color: #0068d7;  /* Change to desired hover color (blue here) */
+    text-shadow: 0 0 7px #007afc;  /* Add a glowing effect */
+    text-decoration: underline;
+    cursor: pointer;
+  }
+
+.title {
+    font-size: 2em;
+    margin-bottom: 1em;
+}
+.form {
+    display: flex;
+    flex-direction: column;
+    width: 300px;
+}
+
+.label {
+    flex-direction: column;
+    text-align: left;
+    margin-bottom: 1.1em;
+}
+.input {
+    width: 100%;
+    padding: 0.5em;
+    margin-top: 0.5em;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+.button {
+    padding: 0.5em;
+    background-color: #0070f3;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+.footer {
+    margin-top: 1em;
+}
+.footer p {
+    margin: 0;
+}
