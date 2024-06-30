@@ -2,6 +2,7 @@
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import styles from './page.module.css';
+
 type Registration = {
     type: 'login' | 'register';
 };
@@ -10,7 +11,7 @@ const Registration: React.FC<Registration> = ({ type }) => {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [fullName, setFullName] = useState("");
-    const [userName, setUserName] = useState("");
+    // const [userName, setUserName] = useState("");
     const router = useRouter();
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -26,7 +27,8 @@ const Registration: React.FC<Registration> = ({ type }) => {
         });
 
         if (response.ok) {
-            router.push('/login'); // Redirect to login page after successful registration
+            
+            router.push('/'); // Redirect to login page after successful registration
         } else {
             console.error('Registration failed');
         }
