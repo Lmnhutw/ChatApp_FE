@@ -7,6 +7,13 @@
     text-align: center;
     color: #fff;
 }
+
+.link:hover {
+    color: #0068d7;  /* Change to desired hover color (blue here) */
+    text-shadow: 0 0 7px #007afc;  /* Add a glowing effect */
+    text-decoration: underline;
+    cursor: pointer;
+  }
 .title {
     font-size: 2em;
     margin-bottom: 1em;
@@ -39,6 +46,7 @@
 }
 .footer {
     margin-top: 1em;
+    
 }
 .footer p {
     margin: 0;
