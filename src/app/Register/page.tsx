@@ -3,11 +3,11 @@ import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import styles from './page.module.css';
 
-type Registration = {
+type RegisterProps  = {
     type: 'login' | 'register';
 };
 
-const Registration: React.FC<Registration> = ({ type }) => {
+const Register: React.FC<RegisterProps > = ({ type }) => {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [fullName, setFullName] = useState("");
@@ -98,4 +98,4 @@ const Registration: React.FC<Registration> = ({ type }) => {
     );
 };
 
-export default Registration;
+export default Register;
