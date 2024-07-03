@@ -1,89 +1,102 @@
 "use client";
-import { useRouter } from 'next/router';
-import { useEffect, useState } from "react";
-import {
-  HubConnection,
-  HubConnectionBuilder,
-  LogLevel,
-} from "@microsoft/signalr";
 
-type Message = {
+import React, { useEffect, useState } from "react";
+import { HubConnectionBuilder, LogLevel, HubConnection } from "@microsoft/signalr";
+
+interface Message {
   sender: string;
   content: string;
-  sentTime: Date;
-};
+  sentTime: string;
+}
+
 const Chat = () => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [newMessage, setNewMessage] = useState("");
   const [connection, setConnection] = useState<HubConnection | null>(null);
+  const [isConnected, setIsConnected] = useState(false);
+
   useEffect(() => {
     const connect = new HubConnectionBuilder()
-      .withUrl("http://localhost:5000/hub")
+      .withUrl("https://localhost:5000/hub")
       .withAutomaticReconnect()
       .configureLogging(LogLevel.Information)
       .build();
+
     setConnection(connect);
-    connect
-      .start()
-      .then(() => {
+
+    const startConnection = async () => {
+      try {
+        console.log("Attempting to connect...");
+        await connect.start();
+        console.log("Connected!");
+        setIsConnected(true);
         connect.on("ReceiveMessage", (sender, content, sentTime) => {
           setMessages((prev) => [...prev, { sender, content, sentTime }]);
         });
         connect.invoke("RetrieveMessageHistory");
-      })
+      } catch (err) {
+        if (err instanceof Error) {
+          console.error("Error while connecting to SignalR Hub:", err.message);
+        } else {
+          console.error("Unknown error while connecting to SignalR Hub:", err);
+        }
+      }
+    };
 
-      .catch((err) =>
-        console.error("Error while connecting to SignalR Hub:", err)
-      );
+    startConnection();
+
+    connect.onclose((error) => {
+      console.log("Connection closed due to error: ", error);
+      setIsConnected(false);
+    });
 
     return () => {
       if (connection) {
         connection.off("ReceiveMessage");
       }
     };
-  },
-      []);
-  const sendMessage = async () => {
-    if (connection && newMessage.trim()) {
-      await connection.send("PostMessage", newMessage);
-      setNewMessage("");
+  }, []);
+
+  const handleSendMessage = async () => {
+    if (connection && newMessage.trim() !== "") {
+      try {
+        await connection.invoke("SendMessage", { 
+          sender: "User", 
+          content: newMessage, 
+          sentTime: new Date().toISOString() 
+        });
+        setNewMessage("");
+      } catch (err) {
+        if (err instanceof Error) {
+          console.error("Error while sending message:", err.message);
+        } else {
+          console.error("Unknown error while sending message:", err);
+        }
+      }
     }
   };
-  const isMyMessage = (username: string) => {
-    return connection && username === connection.connectionId;
-  };
-    return (
-        <div className="p-4">
-      <div className="mb-4">
+
+  return (
+    <div>
+      <div>
         {messages.map((msg, index) => (
-          <div
-            key={index}
-            className={`p-2 my-2 rounded ${
-              isMyMessage(msg.sender) ? "bg-blue-200" : "bg-gray-200"
-            }`}
-          >
-            <p>{msg.content}</p>
-            <p className="text-xs">
-              {new Date(msg.sentTime).toLocaleString()}
-            </p>
+          <div key={index}>
+            <strong>{msg.sender}:</strong> {msg.content} <em>{msg.sentTime}</em>
           </div>
         ))}
       </div>
-      <div className="d-flex justify-row">
-        <input
-          type="text"
-          className="border p-2 mr-2 rounded w-[300px]"
-          value={newMessage}
-          onChange={(e) => setNewMessage(e.target.value)}
-        />
-        <button
-          onClick={sendMessage}
-          className="bg-blue-500 text-white p-2 rounded"
-        >
-          Send
-        </button>
-      </div>
+      <input 
+        type="text" 
+        value={newMessage} 
+        onChange={(e) => setNewMessage(e.target.value)} 
+        placeholder="Type your message..." 
+      />
+      <button onClick={handleSendMessage} disabled={!isConnected}>
+        Send
+      </button>
+      {!isConnected && <div>Disconnected from chat.</div>}
     </div>
-  )
-}
+  );
+};
+
 export default Chat;
