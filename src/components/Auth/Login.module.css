@@ -17,7 +17,10 @@
 .title {
     font-size: 2em;
     margin-bottom: 1em;
+   
 }
+
+
 .form {
     display: flex;
     flex-direction: column;

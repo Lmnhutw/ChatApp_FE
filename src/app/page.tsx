@@ -1,8 +1,6 @@
-import LoginProps from "../components/auth/login";
-
+import Login from "../components/auth/login";
 
 const Page: React.FC = () => {
-  return <LoginProps type="login" />;
+  return <Login />;
 };
 export default Page;
-
