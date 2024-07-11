@@ -1,8 +1,8 @@
 // src/app/components/chat/Chat.tsx
 
 import React, { useState } from "react";
-import { useSignalR } from "../../../hooks/useSignalR"; // Adjust the import path as necessary
-import styles from "./page.module.css"; // Import the module CSS
+import { useSignalR } from "../../../hooks/useSignalR";
+import styles from "./page.module.css";
 
 const Chat = () => {
   const { messages, sendMessage, isConnected } = useSignalR();

@@ -3,9 +3,9 @@ import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import styles from "./Login.module.css";
 
-type LoginProps = {};
+type Login = {};
 
-const Login: React.FC<LoginProps> = () => {
+const Login: React.FC<Login> = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const router = useRouter();
