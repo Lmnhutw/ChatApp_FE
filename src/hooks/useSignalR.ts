@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { HubConnectionBuilder, LogLevel } from "@microsoft/signalr";
+import { timeStamp } from "console";
 
 interface Message {
   sender: string;
@@ -33,11 +34,19 @@ const useSignalR = (room: string, fullname: string) => {
         connect.on("UserJoined", (user: string) => {
           setMessages((prevMessages) => [
             ...prevMessages,
-            { sender: "System", content: `${user} has joined the room`, timeStamp: new Date().toISOString() }
+            {
+              sender: "System",
+              content: `${user} has joined the room`,
+              timeStamp: new Date().toISOString()
+            }
           ]);
         });
 
-        connect.invoke("JoinRoom", {RoomName: room, FullName: fullname })
+        connect.invoke("JoinRoom",
+        {
+          RoomName: room,
+          FullName: fullname
+        })
           .then(() => setJoinError(null))
           .catch((error: any) => {
             console.error("SignalR JoinRoom Error: ", error);
@@ -52,11 +61,27 @@ const useSignalR = (room: string, fullname: string) => {
         .then(() => console.log("Disconnected from the SignalR server."));
     };
   }, [room, fullname]);
+  
 
+ 
   const sendMessage = (message: Message) => {
     if (connection) {
+      const timestamp = new Date().toISOString(); // ISO 8601 format
+
+        console.log("Formatted Time Display: ", timestamp); // Log the formatted time
+
+      
+
       connection
-        .invoke("SendMessage", room, message.sender, message.content)
+        .invoke("SendMessage", {
+          RoomName: room,
+          FullName: message.sender,
+          Content: message.content,
+          timeStamp: timestamp
+        })
+        .then(() => {
+          console.log("Message sent successfully");
+        })
         .catch((error: any) =>
           console.error("SignalR SendMessage Error: ", error)
         );
