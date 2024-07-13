@@ -5,28 +5,29 @@ import { useSignalR } from "../../hooks/useSignalR";
 import styles from "./page.module.css";
 
 const Room = () => {
-  const [fullname, setfullname] = useState("");
+  const [fullname, setFullname] = useState("");
   const [room, setRoom] = useState("");
   const [hasJoined, setHasJoined] = useState(false);
 
-  const { messages, sendMessage, isConnected, joinError } = useSignalR(
-    room,
-    fullname
-  );
+  const { messages, sendMessage, isConnected, joinError, joinRoom } =
+    useSignalR(room, fullname);
   const [message, setMessage] = useState("");
 
   const handleJoinRoom = () => {
     if (fullname.trim() && room.trim()) {
+      joinRoom();
       setHasJoined(true);
     }
   };
 
   const handleSendMessage = () => {
     if (message.trim() !== "") {
+      console.log("Sending message:", message);
       sendMessage({
         sender: fullname,
         content: message,
         timeStamp: new Date().toISOString(),
+        displayTime: "",
       });
       setMessage("");
     }
@@ -40,7 +41,7 @@ const Room = () => {
           type="text"
           placeholder="fullname"
           value={fullname}
-          onChange={(e) => setfullname(e.target.value)}
+          onChange={(e) => setFullname(e.target.value)}
         />
         <input
           type="text"
@@ -61,7 +62,7 @@ const Room = () => {
         {messages.map((msg, index) => (
           <div key={index} className={styles.message}>
             <strong>{msg.sender}:</strong> {msg.content}{" "}
-            <em>{msg.timeStamp}</em>
+            <em>{msg.displayTime}</em>
           </div>
         ))}
       </div>

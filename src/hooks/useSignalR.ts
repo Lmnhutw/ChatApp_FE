@@ -1,16 +1,16 @@
 import { useEffect, useState } from "react";
-import { HubConnectionBuilder, LogLevel } from "@microsoft/signalr";
-import { timeStamp } from "console";
+import { HubConnectionBuilder, LogLevel, HubConnection } from "@microsoft/signalr";
 
 interface Message {
   sender: string;
   content: string;
   timeStamp: string;
+  displayTime: string;
 }
 
 const useSignalR = (room: string, fullname: string) => {
   const [messages, setMessages] = useState<Message[]>([]);
-  const [connection, setConnection] = useState<any>(null);
+  const [connection, setConnection] = useState<HubConnection | null>(null);
   const [isConnected, setIsConnected] = useState(false);
   const [joinError, setJoinError] = useState<string | null>(null);
 
@@ -20,75 +20,85 @@ const useSignalR = (room: string, fullname: string) => {
       .configureLogging(LogLevel.Information)
       .build();
 
-    setConnection(connect);
+    connect.on("ReceiveMessage", (message: Message) => {
+      console.log("Received message:", message);
+    });
 
-    connect
-      .start()
+    connect.on("UserJoined", (user: string) => {
+      console.log("User joined:", user);
+      const joinTime = new Date().toISOString();
+      const displayTime = new Date(joinTime).toLocaleTimeString('en-US', {
+        timeZone: 'Asia/Ho_Chi_Minh',
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: true
+      });
+      setMessages((prevMessages) => [
+        ...prevMessages,
+        {
+          sender: "System",
+          content: `${user} has joined the room`,
+          timeStamp: joinTime,
+          displayTime: displayTime
+        }
+      ]);
+    });
+
+    connect.start()
       .then(() => {
         console.log("Connected to the SignalR server!");
         setIsConnected(true);
-        connect.on("ReceiveMessage", (message: Message) => {
-          setMessages((prevMessages) => [...prevMessages, message]);
-        });
-
-        connect.on("UserJoined", (user: string) => {
-          setMessages((prevMessages) => [
-            ...prevMessages,
-            {
-              sender: "System",
-              content: `${user} has joined the room`,
-              timeStamp: new Date().toISOString()
-            }
-          ]);
-        });
-
-        connect.invoke("JoinRoom",
-        {
-          RoomName: room,
-          FullName: fullname
-        })
-          .then(() => setJoinError(null))
-          .catch((error: any) => {
-            console.error("SignalR JoinRoom Error: ", error);
-            setJoinError("Failed to join the room. Please check the room Name and try again.");
-          });
+        setConnection(connect);
       })
       .catch((error) => console.error("SignalR Connection Error: ", error));
 
     return () => {
-      connect
-        .stop()
-        .then(() => console.log("Disconnected from the SignalR server."));
+      connect.stop().then(() => console.log("Disconnected from the SignalR server."));
     };
-  }, [room, fullname]);
-  
+  }, []);
 
- 
-  const sendMessage = (message: Message) => {
+  const joinRoom = () => {
     if (connection) {
-      const timestamp = new Date().toISOString(); // ISO 8601 format
-
-        console.log("Formatted Time Display: ", timestamp); // Log the formatted time
-
-      
-
-      connection
-        .invoke("SendMessage", {
-          RoomName: room,
-          FullName: message.sender,
-          Content: message.content,
-          timeStamp: timestamp
-        })
+      connection.invoke("JoinRoom", { RoomName: room, FullName: fullname })
         .then(() => {
-          console.log("Message sent successfully");
+          setJoinError(null);
+          console.log("Joined room successfully");
         })
-        .catch((error: any) =>
-          console.error("SignalR SendMessage Error: ", error)
-        );
+        .catch((error: any) => {
+          console.error("SignalR JoinRoom Error: ", error);
+          setJoinError("Failed to join the room. Please check the room Name and try again.");
+        });
     }
   };
 
-  return { messages, sendMessage, isConnected, joinError };
+  const sendMessage = (message: Message) => {
+    if (connection) {
+      const timestamp = new Date().toISOString();
+
+      connection.invoke("SendMessage", {
+        RoomName: room,
+        FullName: message.sender,
+        Content: message.content,
+        Timestamp: timestamp
+      })
+        .then(() => {
+          const displayTime = new Date(timestamp).toLocaleTimeString('en-US', {
+            timeZone: 'Asia/Ho_Chi_Minh',
+            hour: '2-digit',
+            minute: '2-digit',
+            hour12: true
+          });
+          console.log("Message sent:", message);
+          setMessages((prevMessages) => [
+            ...prevMessages,
+            { ...message, timeStamp: timestamp, displayTime: displayTime }
+          ]);
+        })
+        .catch((error: any) => console.error("SignalR SendMessage Error: ", error));
+    }
+  };
+
+  return { messages, sendMessage, isConnected, joinError, joinRoom };
 };
 
 export { useSignalR };
