@@ -1,0 +1,17 @@
+.detailContainer {
+  width: 25%;
+  background-color: #000000;
+  box-sizing: border-box;
+  /* border: 1px solid #ccc; */
+}
+.header {
+  padding: 10px;
+  border-bottom: 1px solid #ccc;
+  background-color: #000000;
+  text-align: center;
+}
+
+.roomInfo {
+  font-size: 16px;
+  color: #ffffff;
+}

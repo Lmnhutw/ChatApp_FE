@@ -8,7 +8,7 @@ interface Message {
   displayTime: string;
 }
 
-const useSignalR = (room: string, fullname: string) => {
+const useSignalR = (chatjoy: string, fullname: string) => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [connection, setConnection] = useState<HubConnection | null>(null);
   const [isConnected, setIsConnected] = useState(false);
@@ -22,6 +22,7 @@ const useSignalR = (room: string, fullname: string) => {
 
     connect.on("ReceiveMessage", (message: Message) => {
       console.log("Received message:", message);
+      setMessages((prevMessages) => [...prevMessages, message]);
     });
 
     connect.on("UserJoined", (user: string) => {
@@ -37,14 +38,15 @@ const useSignalR = (room: string, fullname: string) => {
         ...prevMessages,
         {
           sender: "System",
-          content: `${user} has joined the room`,
+          content: `${user} has joined the chatjoy`,
           timeStamp: joinTime,
           displayTime: displayTime
         }
       ]);
     });
 
-    connect.start()
+    connect
+      .start()
       .then(() => {
         console.log("Connected to the SignalR server!");
         setIsConnected(true);
@@ -59,14 +61,14 @@ const useSignalR = (room: string, fullname: string) => {
 
   const joinRoom = () => {
     if (connection) {
-      connection.invoke("JoinRoom", { RoomName: room, FullName: fullname })
+      connection.invoke("JoinRoom", { RoomName: chatjoy, FullName: fullname })
         .then(() => {
           setJoinError(null);
-          console.log("Joined room successfully");
+          console.log("Joined chatjoy successfully");
         })
         .catch((error: any) => {
           console.error("SignalR JoinRoom Error: ", error);
-          setJoinError("Failed to join the room. Please check the room Name and try again.");
+          setJoinError("Failed to join the chatjoy. Please check the chatjoy Name and try again.");
         });
     }
   };
@@ -76,7 +78,7 @@ const useSignalR = (room: string, fullname: string) => {
       const timestamp = new Date().toISOString();
 
       connection.invoke("SendMessage", {
-        RoomName: room,
+        RoomName: chatjoy,
         FullName: message.sender,
         Content: message.content,
         Timestamp: timestamp

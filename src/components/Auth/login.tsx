@@ -22,7 +22,7 @@ const Login: React.FC<Login> = () => {
     });
 
     if (response.ok) {
-      router.push("/room");
+      router.push("/chatjoy");
     } else {
       console.error("Login failed");
     }

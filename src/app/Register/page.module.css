@@ -6,6 +6,7 @@
     height: 100vh;
     text-align: center;
     color: #fff;
+    padding-bottom: 120px;
 }
 .link:hover {
     color: #0068d7;  /* Change to desired hover color (blue here) */
@@ -50,3 +51,34 @@
 .footer p {
     margin: 0;
 }
+
+.modalOverlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  
+  .modal {
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    position: relative;
+  }
+  
+  .closeButton {
+    background: none;
+    border: none;
+    font-size: 16px;
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    cursor: pointer;
+  }
+  
