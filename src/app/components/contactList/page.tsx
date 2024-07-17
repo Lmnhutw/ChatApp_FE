@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from "react";
 import { toast, Toaster } from "sonner";
 import "./page.css";
+import { useSignalR } from "@/hooks/useSignalR";
 
 interface Room {
   roomId: number;
@@ -18,22 +19,37 @@ const ContactList = () => {
   const [isJoinModalOpen, setIsJoinModalOpen] = useState(false);
   const [joinRoomName, setJoinRoomName] = useState("");
 
+  const { connection, isConnected } = useSignalR("contactList", "CurrentUser");
+
   useEffect(() => {
     fetchRooms();
   }, []);
 
   const fetchRooms = async () => {
-    const response = await fetch("https://localhost:5000/api/Room/GetRoomList");
-    if (response.ok) {
-      const data = await response.json();
-      setRooms(data);
-      if (data.length === 0) {
-        toast("No rooms available.", {
+    try {
+      const response = await fetch(
+        "https://localhost:5000/api/Room/GetRoomList"
+      );
+      if (response.ok) {
+        const data = await response.json();
+        setRooms(data);
+        if (data.length === 0) {
+          toast("No rooms available.", {
+            duration: 5000,
+            position: "top-right",
+          });
+        }
+      } else {
+        toast.error("Failed to fetch rooms.", {
           duration: 5000,
           position: "top-right",
+          action: {
+            label: "x",
+            onClick: () => toast.dismiss(),
+          },
         });
       }
-    } else {
+    } catch (error) {
       toast.error("Failed to fetch rooms.", {
         duration: 5000,
         position: "top-right",
@@ -46,61 +62,79 @@ const ContactList = () => {
   };
 
   const handleAddRoom = async (isTest = false) => {
-    if (roomName.trim()) {
-      const response = await fetch(`/api/room?isTest=${isTest}`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ roomName }),
-      });
-
-      if (response.ok) {
-        const newRoom = await response.json();
+    if (roomName.trim() && connection) {
+      try {
+        await connection.invoke(
+          "CreateRoom",
+          { RoomName: roomName, CreatedBy: "CurrentUser" },
+          isTest
+        );
         if (!isTest) {
-          setRooms([...rooms, newRoom]);
+          setRooms([
+            ...rooms,
+            {
+              roomId: Date.now(),
+              roomName,
+              createdBy: "CurrentUser",
+              adminName: "CurrentUser",
+              members: [],
+            },
+          ]);
         }
         setRoomName("");
         setIsModalOpen(false);
         toast.success("Room created successfully!", {
           duration: 5000,
           position: "top-right",
+          action: {
+            label: "X",
+            onClick: () => toast.dismiss(),
+          },
         });
-      } else {
+      } catch (error) {
         toast.error("Failed to create room.", {
           duration: 5000,
           position: "top-right",
+          action: {
+            label: "X",
+            onClick: () => toast.dismiss(),
+          },
         });
+        console.error("SignalR CreateRoom Error: ", error);
       }
     }
   };
 
   const handleJoinRoom = async () => {
-    if (joinRoomName.trim()) {
-      const response = await fetch(`/api/joinRoom`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ roomName: joinRoomName }),
-      });
-
-      if (response.ok) {
+    if (joinRoomName.trim() && connection) {
+      try {
+        await connection.invoke("JoinRoom", {
+          RoomName: joinRoomName,
+          FullName: "CurrentUser",
+        });
         toast.success("Joined room successfully!", {
           duration: 5000,
           position: "top-right",
+          action: {
+            label: "X",
+            onClick: () => toast.dismiss(),
+          },
         });
         setJoinRoomName("");
         setIsJoinModalOpen(false);
-      } else {
+      } catch (error) {
         toast.error("Failed to join room.", {
           duration: 5000,
           position: "top-right",
+          action: {
+            label: "X",
+            onClick: () => toast.dismiss(),
+          },
         });
+        console.error("SignalR JoinRoom Error: ", error);
       }
     }
   };
-
   return (
     <div className="contactListContainer">
       <div className="header">

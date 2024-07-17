@@ -2,7 +2,7 @@
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast, Toaster } from "sonner";
-import styles from "./page.module.css";
+import "./page.css";
 
 type RegisterProps = {};
 
@@ -33,10 +33,6 @@ const Register: React.FC<RegisterProps> = () => {
           {
             duration: 5000,
             position: "top-right",
-            action: {
-              label: "X",
-              onClick: () => toast.dismiss(),
-            },
           }
         );
         setIsModalOpen(true); // Open the modal
@@ -45,10 +41,6 @@ const Register: React.FC<RegisterProps> = () => {
       toast.error("Registration failed", {
         duration: 5000,
         position: "top-right",
-        action: {
-          label: "X",
-          onClick: () => toast.dismiss(),
-        },
       });
     }
   };
@@ -89,14 +81,14 @@ const Register: React.FC<RegisterProps> = () => {
   };
 
   return (
-    <div className={styles.container}>
-      <h1 className={styles.title}>Register</h1>
-      <form className={styles.form} onSubmit={handleSubmit}>
-        <label className={styles.label}>
+    <div className="container">
+      <h1 className="title">Register</h1>
+      <form className="form" onSubmit={handleSubmit}>
+        <label className="label">
           Full Name
           <input
             type="text"
-            className={styles.input}
+            className="input"
             value={fullName}
             onChange={(e) => setFullName(e.target.value)}
             required
@@ -104,11 +96,11 @@ const Register: React.FC<RegisterProps> = () => {
           />
         </label>
 
-        <label className={styles.label}>
+        <label className="label">
           Email
           <input
             type="email"
-            className={styles.input}
+            className="input"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             placeholder="you@example.com"
@@ -116,11 +108,11 @@ const Register: React.FC<RegisterProps> = () => {
           />
         </label>
 
-        <label className={styles.label}>
+        <label className="label">
           Password
           <input
             type="password"
-            className={styles.input}
+            className="input"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             placeholder="••••••••"
@@ -128,22 +120,22 @@ const Register: React.FC<RegisterProps> = () => {
           />
         </label>
 
-        <button type="submit" className={styles.button}>
+        <button type="submit" className="button">
           Register
         </button>
       </form>
-      <div className={styles.footer}>
+      <div className="footer">
         <p>
           You already have an account?{" "}
-          <span onClick={() => router.push("/")} className={styles.link}>
+          <span onClick={() => router.push("/")} className="link">
             Login
           </span>
         </p>
       </div>
       {isModalOpen && (
-        <div className={styles.modalOverlay}>
-          <div className={styles.modal}>
-            <button className={styles.closeButton} onClick={handleCloseModal}>
+        <div className="modalOverlay">
+          <div className="modal">
+            <button className="closeButton" onClick={handleCloseModal}>
               X
             </button>
             <p>Please check your email to verify your account.</p>
@@ -154,7 +146,6 @@ const Register: React.FC<RegisterProps> = () => {
           </div>
         </div>
       )}
-      <Toaster richColors />
     </div>
   );
 };

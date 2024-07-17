@@ -1,16 +1,16 @@
 "use client";
 import React from "react";
-import styles from "./page.module.css";
+import "./page.css";
 
 const NavigationPanel = () => {
   return (
-    <div className={styles.navigationPanelContainer}>
-      <div className={styles.header}>
+    <div className="navigationPanelContainer">
+      <div className="header">
         <h2>ChatJoy</h2>
       </div>
-      <div className={styles.navItem}>Home</div>
-      <div className={styles.navItem}>Chat</div>
-      <div className={styles.navItem}>Settings</div>
+      <div className="navItem">Home</div>
+      <div className="navItem">Chat</div>
+      <div className="navItem">Settings</div>
       {/* Add more navigation items as needed */}
     </div>
   );

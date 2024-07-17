@@ -5,11 +5,11 @@ import ChatDetail from "../components/chatDetail/page";
 import ContactList from "../components/contactList/page";
 import NavigationPanel from "../components/navigationPanel/page";
 import Chat from "../components/chat/page";
-import styles from "./page.module.css";
+import "./page.css";
 
 const ChatJoy = () => {
   return (
-    <div className={styles.chatJoyContainer}>
+    <div className="chatJoyContainer">
       <NavigationPanel />
       <ContactList />
       <Chat />

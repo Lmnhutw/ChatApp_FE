@@ -61,7 +61,7 @@ const useSignalR = (chatjoy: string, fullname: string) => {
 
   const joinRoom = () => {
     if (connection) {
-      connection.invoke("JoinRoom", { RoomName: chatjoy, FullName: fullname })
+      connection.invoke("JoinRoom", { roomName: chatjoy, FullName: fullname })
         .then(() => {
           setJoinError(null);
           console.log("Joined chatjoy successfully");
@@ -78,7 +78,7 @@ const useSignalR = (chatjoy: string, fullname: string) => {
       const timestamp = new Date().toISOString();
 
       connection.invoke("SendMessage", {
-        RoomName: chatjoy,
+        roomName: chatjoy,
         FullName: message.sender,
         Content: message.content,
         Timestamp: timestamp
@@ -100,7 +100,7 @@ const useSignalR = (chatjoy: string, fullname: string) => {
     }
   };
 
-  return { messages, sendMessage, isConnected, joinError, joinRoom };
+  return { messages, sendMessage, isConnected, joinError, joinRoom, connection };
 };
 
 export { useSignalR };

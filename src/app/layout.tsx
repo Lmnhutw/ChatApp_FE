@@ -13,5 +13,4 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   );
 };
 
-<Toaster richColors />;
 export default Layout;
