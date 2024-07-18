@@ -1,8 +1,8 @@
-"use client";
-import React, { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import { toast, Toaster } from "sonner";
-import "./page.css";
 import { useSignalR } from "@/hooks/useSignalR";
+import "./page.css";
+import axios from "axios";
 
 interface Room {
   roomId: number;
@@ -18,6 +18,14 @@ const ContactList = () => {
   const [rooms, setRooms] = useState<Room[]>([]);
   const [isJoinModalOpen, setIsJoinModalOpen] = useState(false);
   const [joinRoomName, setJoinRoomName] = useState("");
+  const [clickRoom, setClickRoom] = useState("");
+  const [user, setUser] = useState<{
+    id: string;
+    email: string;
+    userName: string;
+    fullName: string;
+    profilePic: string;
+  } | null>(null);
 
   const { connection, isConnected } = useSignalR("contactList", "CurrentUser");
 
@@ -61,26 +69,37 @@ const ContactList = () => {
     }
   };
 
-  const handleAddRoom = async (isTest = false) => {
+  const handleAddRoom = async () => {
     if (roomName.trim() && connection) {
       try {
-        await connection.invoke(
-          "CreateRoom",
-          { RoomName: roomName, CreatedBy: "CurrentUser" },
-          isTest
-        );
-        if (!isTest) {
-          setRooms([
-            ...rooms,
-            {
-              roomId: Date.now(),
-              roomName,
-              createdBy: "CurrentUser",
-              adminName: "CurrentUser",
-              members: [],
-            },
-          ]);
+        const userId = localStorage.getItem("USER_ID");
+        if (!userId) {
+          throw new Error("User ID not found in local storage.");
         }
+
+        const response = await axios.get(
+          `https://localhost:5000/api/Auth/GetUserById/${userId}`
+        );
+        if (response.status === 200) {
+          setUser(response.data);
+        } else {
+          console.error("Failed to fetch user data.");
+        }
+
+        await connection.invoke("CreateRoom", {
+          RoomName: roomName,
+          CreatedBy: userId,
+        });
+        setRooms([
+          ...rooms,
+          {
+            roomId: Date.now(),
+            roomName,
+            createdBy: "CurrentUser",
+            adminName: "CurrentUser",
+            members: [],
+          },
+        ]);
         setRoomName("");
         setIsModalOpen(false);
         toast.success("Room created successfully!", {
@@ -106,13 +125,25 @@ const ContactList = () => {
   };
 
   const handleJoinRoom = async () => {
-    if (joinRoomName.trim() && connection) {
+    if (roomName.trim() && connection) {
       try {
-        await connection.invoke("JoinRoom", {
-          RoomName: joinRoomName,
-          FullName: "CurrentUser",
+        await connection.invoke("CreateRoom", {
+          RoomName: roomName,
+          CreatedBy: "CurrentUser",
         });
-        toast.success("Joined room successfully!", {
+        setRooms([
+          ...rooms,
+          {
+            roomId: Date.now(),
+            roomName,
+            createdBy: "CurrentUser",
+            adminName: "CurrentUser",
+            members: [],
+          },
+        ]);
+        setRoomName("");
+        setIsModalOpen(false);
+        toast.success("Room created successfully!", {
           duration: 5000,
           position: "top-right",
           action: {
@@ -120,10 +151,8 @@ const ContactList = () => {
             onClick: () => toast.dismiss(),
           },
         });
-        setJoinRoomName("");
-        setIsJoinModalOpen(false);
       } catch (error) {
-        toast.error("Failed to join room.", {
+        toast.error("Failed to create room.", {
           duration: 5000,
           position: "top-right",
           action: {
@@ -131,10 +160,14 @@ const ContactList = () => {
             onClick: () => toast.dismiss(),
           },
         });
-        console.error("SignalR JoinRoom Error: ", error);
+        console.error("SignalR CreateRoom Error: ", error);
       }
     }
   };
+
+  // const handleRoomClick = (roomName) => {
+  //   setChosenRoom(roomName);
+  // };
   return (
     <div className="contactListContainer">
       <div className="header">
@@ -175,10 +208,7 @@ const ContactList = () => {
               className="input"
             />
             <div className="buttonContainer">
-              <button
-                onClick={() => handleAddRoom(false)}
-                className="sendButtonConfirm"
-              >
+              <button onClick={handleAddRoom} className="sendButtonConfirm">
                 Create Room
               </button>
               <button

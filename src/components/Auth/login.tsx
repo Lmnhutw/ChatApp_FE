@@ -44,6 +44,9 @@ const Login: React.FC<Login> = () => {
     );
 
     if (response.ok) {
+      const data = await response.json();
+      localStorage.setItem("token", data.Token);
+      localStorage.setItem("USER_ID", data.user.id);
       router.push("/chatjoy");
     } else {
       console.error("Login failed:", await response.text());

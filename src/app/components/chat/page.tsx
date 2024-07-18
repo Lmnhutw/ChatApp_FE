@@ -1,6 +1,6 @@
 "use client";
 import React, { useState } from "react";
-import styles from "./page.module.css";
+import "./page.css";
 
 interface Message {
   sender: string;
@@ -33,36 +33,36 @@ const Chat: React.FC = () => {
   };
 
   return (
-    <div className={styles.chatContainer}>
-      <div className={styles.header}>
+    <div className="chatContainer">
+      <div className="header">
         <h2>Chat</h2>
       </div>
-      <div className={styles.messageList}>
+      <div className="messageList">
         {messages.map((msg, index) => (
-          <div key={index} className={styles.message}>
+          <div key={index} className="message">
             <strong>{msg.sender}:</strong> {msg.content}{" "}
             <em>{msg.displayTime}</em>
           </div>
         ))}
       </div>
-      <div className={styles.inputContainer}>
+      <div className="inputContainer">
         <input
           type="text"
           value={message}
           onChange={(e) => setMessage(e.target.value)}
           placeholder="Type your message..."
-          className={styles.input}
+          className="input__chat"
         />
         <button
           onClick={handleSendMessage}
           disabled={!isConnected}
-          className={styles.sendButton}
+          className="sendButton"
         >
           Send
         </button>
       </div>
       {!isConnected && (
-        <div className={styles.disconnected}>Disconnected from chat.</div>
+        <div className="disconnected">Disconnected from chat.</div>
       )}
     </div>
   );

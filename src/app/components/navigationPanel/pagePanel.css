@@ -1,0 +1,50 @@
+.navigationPanelContainer {
+  border-right: 1px solid #ccc;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.header__panel {
+  background-color: #000000;
+  text-align: center;
+}
+
+.header__panel h2 {
+  padding: 10px;
+  border-bottom: 1px solid #e9ecef;
+}
+
+.navItem {
+  padding: 15px 20px;
+  border-bottom: 1px solid #eee;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.navItem:hover {
+  background-color: #e9ecef;
+  color: #000;
+}
+
+.userProfile {
+  display: flex;
+  background-color: white;
+  justify-content: center;
+  align-items: center;
+  gap: 15px;
+}
+
+.userProfile .avatar {
+  width: 40px;
+  height: 40px;
+}
+
+.userProfile span {
+  color: black;
+}
+
+.userProfile:hover {
+  background-color: #e9ecef;
+  color: #000;
+}
