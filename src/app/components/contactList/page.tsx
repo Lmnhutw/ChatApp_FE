@@ -8,7 +8,7 @@ interface Room {
   roomId: number;
   roomName: string;
   createdBy: string;
-  adminName: string;
+  userId: string;
   members: any[];
 }
 
@@ -70,46 +70,40 @@ const ContactList = () => {
   };
 
   const handleAddRoom = async () => {
-    if (roomName.trim() && connection) {
+    const userId = localStorage.getItem("USER_ID");
+    const fullName = localStorage.getItem("FULL_NAME");
+    if (roomName.trim() && connection && userId && fullName) {
       try {
-        const userId = localStorage.getItem("USER_ID");
-        if (!userId) {
-          throw new Error("User ID not found in local storage.");
-        }
-
-        const response = await axios.get(
-          `https://localhost:5000/api/Auth/GetUserById/${userId}`
-        );
-        if (response.status === 200) {
-          setUser(response.data);
-        } else {
-          console.error("Failed to fetch user data.");
-        }
-
-        await connection.invoke("CreateRoom", {
+        const newRoom = await connection.invoke("CreateRoom", {
           RoomName: roomName,
-          CreatedBy: userId,
+          CreatedBy: fullName,
+          UserId: userId,
         });
-        setRooms([
-          ...rooms,
-          {
-            roomId: Date.now(),
-            roomName,
-            createdBy: "CurrentUser",
-            adminName: "CurrentUser",
-            members: [],
-          },
-        ]);
-        setRoomName("");
-        setIsModalOpen(false);
-        toast.success("Room created successfully!", {
-          duration: 5000,
-          position: "top-right",
-          action: {
-            label: "X",
-            onClick: () => toast.dismiss(),
-          },
-        });
+        if (newRoom && newRoom.roomId) {
+          setRooms([
+            ...rooms,
+            {
+              roomId: newRoom.roomId,
+              roomName,
+              createdBy: fullName,
+              userId,
+              members: [],
+            },
+          ]);
+          console.log(newRoom.roomId);
+          setRoomName("");
+          setIsModalOpen(false);
+          toast.success("Room created successfully!", {
+            duration: 5000,
+            position: "top-right",
+            action: {
+              label: "X",
+              onClick: () => toast.dismiss(),
+            },
+          });
+        } else {
+          throw new Error("Invalid room data received from server");
+        }
       } catch (error) {
         toast.error("Failed to create room.", {
           duration: 5000,
@@ -123,27 +117,55 @@ const ContactList = () => {
       }
     }
   };
-
   const handleJoinRoom = async () => {
-    if (roomName.trim() && connection) {
-      try {
-        await connection.invoke("CreateRoom", {
-          RoomName: roomName,
-          CreatedBy: "CurrentUser",
-        });
-        setRooms([
-          ...rooms,
-          {
-            roomId: Date.now(),
-            roomName,
-            createdBy: "CurrentUser",
-            adminName: "CurrentUser",
-            members: [],
-          },
-        ]);
-        setRoomName("");
-        setIsModalOpen(false);
-        toast.success("Room created successfully!", {
+    const userId = localStorage.getItem("USER_ID");
+    const fullName = localStorage.getItem("FULL_NAME");
+
+    if (joinRoomName.trim() && connection && userId && fullName) {
+      const roomId = joinRoomName; // Use the roomId directly from the input
+
+      const room = rooms.find((r) => r.roomId === parseInt(roomId, 10));
+      if (room) {
+        try {
+          await connection.invoke("JoinRoom", {
+            RoomId: room.roomId,
+            FullName: fullName,
+            UserId: userId,
+            IsMember: true,
+          });
+          toast.success("Joined room successfully!", {
+            duration: 5000,
+            position: "top-right",
+            action: {
+              label: "X",
+              onClick: () => toast.dismiss(),
+            },
+          });
+          setJoinRoomName("");
+          setIsJoinModalOpen(false);
+        } catch (error: unknown) {
+          toast.error("Failed to join room.", {
+            duration: 5000,
+            position: "top-right",
+            action: {
+              label: "X",
+              onClick: () => toast.dismiss(),
+            },
+          });
+
+          if (error instanceof Error) {
+            console.error("SignalR JoinRoom Error: ", error.message);
+            console.error("Stack Trace: ", error.stack);
+          } else if (typeof error === "string") {
+            console.error("Error: ", error);
+          } else if (error && typeof error === "object") {
+            console.error("Unknown error object: ", error);
+          } else {
+            console.error("An unexpected error occurred.");
+          }
+        }
+      } else {
+        toast.error("Room not found.", {
           duration: 5000,
           position: "top-right",
           action: {
@@ -151,16 +173,6 @@ const ContactList = () => {
             onClick: () => toast.dismiss(),
           },
         });
-      } catch (error) {
-        toast.error("Failed to create room.", {
-          duration: 5000,
-          position: "top-right",
-          action: {
-            label: "X",
-            onClick: () => toast.dismiss(),
-          },
-        });
-        console.error("SignalR CreateRoom Error: ", error);
       }
     }
   };
