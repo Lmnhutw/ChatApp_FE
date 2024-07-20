@@ -17,7 +17,8 @@ const ContactList = () => {
   const [roomName, setRoomName] = useState("");
   const [rooms, setRooms] = useState<Room[]>([]);
   const [isJoinModalOpen, setIsJoinModalOpen] = useState(false);
-  const [joinRoomName, setJoinRoomName] = useState("");
+  const [joinRoomId, setJoinRoomId] = useState<number | null>(null);
+  const [joinRoomIdInput, setJoinRoomIdInput] = useState("");
   const [clickRoom, setClickRoom] = useState("");
   const [user, setUser] = useState<{
     id: string;
@@ -74,23 +75,24 @@ const ContactList = () => {
     const fullName = localStorage.getItem("FULL_NAME");
     if (roomName.trim() && connection && userId && fullName) {
       try {
-        const newRoom = await connection.invoke("CreateRoom", {
+        const room = await connection.invoke("CreateRoom", {
           RoomName: roomName,
           CreatedBy: fullName,
           UserId: userId,
         });
-        if (newRoom && newRoom.roomId) {
+        console.log("Server response: ", room);
+        if (room && room.roomId) {
           setRooms([
             ...rooms,
             {
-              roomId: newRoom.roomId,
+              roomId: room.roomId,
               roomName,
               createdBy: fullName,
               userId,
               members: [],
             },
           ]);
-          console.log(newRoom.roomId);
+          console.log(room.roomId);
           setRoomName("");
           setIsModalOpen(false);
           toast.success("Room created successfully!", {
@@ -121,18 +123,19 @@ const ContactList = () => {
     const userId = localStorage.getItem("USER_ID");
     const fullName = localStorage.getItem("FULL_NAME");
 
-    if (joinRoomName.trim() && connection && userId && fullName) {
-      const roomId = joinRoomName; // Use the roomId directly from the input
+    const parsedJoinRoomId = parseInt(joinRoomIdInput, 10); // Parse input to integer
 
-      const room = rooms.find((r) => r.roomId === parseInt(roomId, 10));
-      if (room) {
-        try {
-          await connection.invoke("JoinRoom", {
-            RoomId: room.roomId,
+    if (parsedJoinRoomId && userId && fullName) {
+      try {
+        const response = await axios.post(
+          "https://localhost:5000/api/Room/JoinRoom",
+          {
+            RoomId: parsedJoinRoomId,
             FullName: fullName,
             UserId: userId,
-            IsMember: true,
-          });
+          }
+        );
+        if (response.status === 200) {
           toast.success("Joined room successfully!", {
             duration: 5000,
             position: "top-right",
@@ -141,31 +144,13 @@ const ContactList = () => {
               onClick: () => toast.dismiss(),
             },
           });
-          setJoinRoomName("");
+          setJoinRoomIdInput("");
           setIsJoinModalOpen(false);
-        } catch (error: unknown) {
-          toast.error("Failed to join room.", {
-            duration: 5000,
-            position: "top-right",
-            action: {
-              label: "X",
-              onClick: () => toast.dismiss(),
-            },
-          });
-
-          if (error instanceof Error) {
-            console.error("SignalR JoinRoom Error: ", error.message);
-            console.error("Stack Trace: ", error.stack);
-          } else if (typeof error === "string") {
-            console.error("Error: ", error);
-          } else if (error && typeof error === "object") {
-            console.error("Unknown error object: ", error);
-          } else {
-            console.error("An unexpected error occurred.");
-          }
+        } else {
+          throw new Error("Failed to join room");
         }
-      } else {
-        toast.error("Room not found.", {
+      } catch (error) {
+        toast.error("Failed to join room.", {
           duration: 5000,
           position: "top-right",
           action: {
@@ -173,10 +158,10 @@ const ContactList = () => {
             onClick: () => toast.dismiss(),
           },
         });
+        console.error("JoinRoom Error: ", error);
       }
     }
   };
-
   // const handleRoomClick = (roomName) => {
   //   setChosenRoom(roomName);
   // };
@@ -202,7 +187,7 @@ const ContactList = () => {
       {rooms.length > 0 ? (
         rooms.map((room, index) => (
           <div key={index} className="contactItem">
-            {room.roomName}
+            {room.roomName} (ID: {room.roomId})
           </div>
         ))
       ) : (
@@ -239,9 +224,9 @@ const ContactList = () => {
             <h3>Join Room</h3>
             <input
               type="text"
-              value={joinRoomName}
-              onChange={(e) => setJoinRoomName(e.target.value)}
-              placeholder="Enter room name"
+              value={joinRoomIdInput}
+              onChange={(e) => setJoinRoomIdInput(e.target.value)}
+              placeholder="Enter room ID"
               className="input"
             />
             <div className="buttonContainer">
