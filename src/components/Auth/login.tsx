@@ -1,7 +1,8 @@
 "use client";
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
-import styles from "./Login.module.css";
+import "./login.css";
+import { toast, Toaster } from "sonner";
 
 type Login = {};
 
@@ -20,57 +21,79 @@ const Login: React.FC<Login> = () => {
       },
       body: JSON.stringify({ email, password }),
     });
+    toast.promise(
+      async () => {
+        // Simulate a login process with a delay (replace with your actual login logic)
+        await new Promise((resolve) => setTimeout(resolve, 600)); // Adjust delay as needed
+
+        // Check for successful response status
+        if (response.ok) {
+          return true; // Return true for successful login
+        } else {
+          throw new Error("Login failed"); // Throw an error for failed login
+        }
+      },
+      {
+        loading: "Logging in...",
+        success: () => "Login successful!",
+        error: (error) => {
+          console.error("Login failed:", error);
+          return "Login failed. Please check your email and password.";
+        },
+      }
+    );
 
     if (response.ok) {
-      router.push("/room");
+      const data = await response.json();
+      localStorage.setItem("token", data.token);
+      localStorage.setItem("USER_ID", data.user.id);
+      localStorage.setItem("FULL_NAME", data.user.fullName);
+      router.push("/chatjoy");
     } else {
-      console.error("Login failed");
+      console.error("Login failed:", await response.text());
     }
   };
-
   return (
-    <div className={styles.container}>
-      <h1 className={styles.title}>
+    <div className="container">
+      <h1 className="title">
         Welcome to ChatApp <br />
         Login
       </h1>
-      {/* <h2 className={styles.title2}>Login </h2> */}
-      <form className={styles.form} onSubmit={handleSubmit}>
-        <label className={styles.label}>
+      {/* <h2 className="title2">Login </h2> */}
+      <form className="form" onSubmit={handleSubmit}>
+        <label className="label">
           Email
           <input
             type="email"
-            className={styles.input}
+            className="input"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             placeholder="you@example.com"
           />
         </label>
-        <label className={styles.label}>
+        <label className="label">
           Password
           <input
             type="password"
-            className={styles.input}
+            className="input"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             placeholder="••••••••"
           />
         </label>
-        <button type="submit" className={styles.button}>
+        <button type="submit" className="button">
           Login
         </button>
       </form>
-      <div className={styles.footer}>
+      <div className="footer">
         <p>
           You don&apos;t have an account?{" "}
-          <span
-            onClick={() => router.push("/register")}
-            className={styles.link}
-          >
+          <span onClick={() => router.push("/register")} className="link">
             Sign Up
           </span>
         </p>
       </div>
+      <Toaster richColors expand={true} closeButton />
     </div>
   );
 };

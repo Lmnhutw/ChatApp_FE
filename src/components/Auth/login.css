@@ -6,18 +6,22 @@
     height: 100vh;
     text-align: center;
     color: #fff;
+    padding-bottom: 100px;
 }
+
 .link:hover {
     color: #0068d7;  /* Change to desired hover color (blue here) */
     text-shadow: 0 0 7px #007afc;  /* Add a glowing effect */
     text-decoration: underline;
     cursor: pointer;
   }
-
 .title {
     font-size: 2em;
     margin-bottom: 1em;
+   
 }
+
+
 .form {
     display: flex;
     flex-direction: column;
@@ -46,6 +50,7 @@
 }
 .footer {
     margin-top: 1em;
+    
 }
 .footer p {
     margin: 0;

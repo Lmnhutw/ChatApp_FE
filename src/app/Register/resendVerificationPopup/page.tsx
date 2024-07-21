@@ -1,63 +1,49 @@
-// components/ResendVerificationPopup.tsx
-
+"use client";
 import React, { useState } from "react";
 import axios from "axios";
-import {
-  Button,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogContentText,
-  DialogTitle,
-} from "@mui/material";
+import { toast, Toaster } from "sonner";
 
-interface resendVerificationPopupProps {
-  open: boolean;
-  onClose: () => void;
-  userEmail: string;
-}
+interface Props {}
 
-const ResendVerificationPopup: React.FC<resendVerificationPopupProps> = ({
-  open,
-  onClose,
-  userEmail,
-}) => {
+const ResendVerificationPopup: React.FC<Props> = () => {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
-  console.log(open);
 
   const handleResend = async () => {
     setLoading(true);
     try {
-      const response = await axios.post("/api/Auth/resend-verification-email", {
-        email: userEmail,
-      });
-      setMessage(response.data.Message);
+      const email = localStorage.getItem("USER_KEY");
+      if (!email) {
+        throw new Error("User email not found in local storage.");
+      }
+
+      const response = await axios.post(
+        `https://localhost:5000/api/Auth/resend-verification-email/${email}`,
+        {}
+      );
+
+      if (response.status === 200) {
+        setMessage(response.data.Message);
+        toast.success("Verification email sent successfully!");
+      } else {
+        setMessage("Error resending verification email.");
+        toast.error("Error resending verification email.");
+      }
     } catch (error) {
       setMessage("Error resending verification email.");
+      toast.error("Error resending verification email.");
     }
     setLoading(false);
   };
 
   return (
-    <Dialog open={open} onClose={onClose}>
-      <DialogTitle>Email Verification</DialogTitle>
-      <DialogContent>
-        <DialogContentText>
-          Please check your email to verify your account. If you did not receive
-          the email, click the button below to resend it.
-        </DialogContentText>
-        {message && <DialogContentText>{message}</DialogContentText>}
-      </DialogContent>
-      <DialogActions>
-        <Button onClick={onClose} color="primary">
-          Close
-        </Button>
-        <Button onClick={handleResend} color="primary" disabled={loading}>
-          {loading ? "Sending..." : "Resend Email"}
-        </Button>
-      </DialogActions>
-    </Dialog>
+    <div>
+      <button onClick={handleResend} disabled={loading}>
+        {loading ? "Sending..." : "Resend Verification Email"}
+      </button>
+      <p>{message}</p>
+      <Toaster richColors />
+    </div>
   );
 };
 
