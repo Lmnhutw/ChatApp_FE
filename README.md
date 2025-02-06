@@ -1,8 +1,10 @@
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# Real-Time Chat Frontend
+
+This project is a real-time chat application frontend built with [Next.js](https://nextjs.org/) and utilizes [SignalR](https://dotnet.microsoft.com/en-us/apps/aspnet/signalr) for real-time communication. It was initialized with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
 
 ## Getting Started
 
-First, run the development server:
+To start the development server, run one of the following commands:
 
 ```bash
 npm run dev
@@ -14,23 +16,28 @@ pnpm dev
 bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Once the server is running, open [http://localhost:3000](http://localhost:3000) in your browser to access the chat application.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### Development
+You can modify the project by editing the `app/page.tsx` file. Any changes made will automatically update in the browser.
 
-This project uses [`next/font`](https://nextjs.org/docs/basic-features/font-optimization) to automatically optimize and load Inter, a custom Google Font.
+This project leverages [`next/font`](https://nextjs.org/docs/basic-features/font-optimization) for optimized font loading, specifically the Inter font.
 
-## Learn More
+## Real-Time Communication with SignalR
 
-To learn more about Next.js, take a look at the following resources:
+This frontend connects to a SignalR backend to enable real-time chat functionality. Ensure that the backend server is running and properly configured to handle WebSocket connections.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Additional Resources
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
+For more information about Next.js and SignalR, explore the following resources:
 
-## Deploy on Vercel
+- [Next.js Documentation](https://nextjs.org/docs) - Learn about the framework’s features and API.
+- [Next.js Interactive Tutorial](https://nextjs.org/learn) - A step-by-step guide to mastering Next.js.
+- [SignalR Documentation](https://dotnet.microsoft.com/en-us/apps/aspnet/signalr) - Learn about real-time communication with SignalR.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Deployment
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
+The simplest way to deploy your Next.js chat application is via [Vercel](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme), the platform built by the creators of Next.js.
+
+Refer to the [Next.js deployment documentation](https://nextjs.org/docs/deployment) for detailed instructions on deploying your app.
+
