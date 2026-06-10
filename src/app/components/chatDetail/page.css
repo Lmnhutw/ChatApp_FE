@@ -13,4 +13,26 @@
 .roomInfo {
   font-size: 16px;
   color: #ffffff;
+  padding: 16px;
+}
+
+.memberList {
+  margin-top: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.memberItem {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.16);
+  padding-bottom: 8px;
+}
+
+.presenceStatus {
+  color: #999;
+  font-size: 12px;
+  text-transform: capitalize;
 }

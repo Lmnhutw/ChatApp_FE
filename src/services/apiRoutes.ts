@@ -53,8 +53,4 @@ export const apiRoutes = {
     byId: (attachmentId: Guid) =>
       `/api/Attachments/${encodeSegment(attachmentId)}`,
   },
-  legacyRooms: {
-    list: "/api/Room/GetRoomList",
-    join: "/api/Room/JoinRoom",
-  },
 };

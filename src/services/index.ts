@@ -5,4 +5,3 @@ export * from "./messageService";
 export * from "./userService";
 export * from "./reactionService";
 export * from "./attachmentService";
-export * from "./legacyRoomService";

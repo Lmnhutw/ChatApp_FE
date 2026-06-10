@@ -134,6 +134,39 @@ export interface MessageReadReceipt {
   user?: UserProfile;
 }
 
+export interface MessageDeletedEvent {
+  conversationId: Guid;
+  messageId: Guid;
+  deletedByUserId?: Guid;
+  deletedAt: string;
+}
+
+export interface TypingChangedEvent {
+  conversationId: Guid;
+  userId: Guid;
+  isTyping: boolean;
+  user?: UserProfile;
+}
+
+export interface MessageReadEvent extends MessageReadReceipt {
+  conversationId: Guid;
+}
+
+export interface RealtimeError {
+  message: string;
+  code?: string;
+  conversationId?: Guid;
+  details?: unknown;
+}
+
+export type SignalRConnectionStatus =
+  | "idle"
+  | "connecting"
+  | "connected"
+  | "reconnecting"
+  | "disconnected"
+  | "error";
+
 export interface ChatMessage {
   id: Guid;
   conversationId: Guid;
@@ -156,6 +189,21 @@ export interface SendMessageRequest {
   content: string;
   attachments?: CreateAttachmentRequest[];
   replyToMessageId?: Guid | null;
+}
+
+export interface SendTypingRequest {
+  conversationId: Guid;
+  isTyping: boolean;
+}
+
+export interface MarkMessageReadRequest {
+  conversationId: Guid;
+  messageId: Guid;
+}
+
+export interface RemoveReactionRequest {
+  messageId: Guid;
+  emoji: string;
 }
 
 export interface UpdateMessageRequest {

@@ -15,6 +15,41 @@
 
 .message {
   margin-bottom: 10px; /* Space between messages */
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  max-width: 76%;
+  padding: 10px;
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.ownMessage {
+  margin-left: auto;
+  background: rgba(0, 123, 255, 0.16);
+}
+
+.messageHeader {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  font-size: 13px;
+}
+
+.messageContent {
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+}
+
+.emptyChat,
+.typingIndicator {
+  color: #999;
+  padding: 10px 0;
+}
+
+.typingIndicator {
+  font-size: 14px;
+  font-style: italic;
 }
 
 .header {
@@ -36,6 +71,11 @@
   padding: 10px;
   border: 1px solid #ccc;
   border-radius: 4px;
+}
+
+.input__chat:disabled {
+  background-color: #f2f2f2;
+  cursor: not-allowed;
 }
 
 .sendButton {

@@ -2,13 +2,14 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import React from "react";
-import ChatDetail from "../components/chatDetail/page";
-import ContactList from "../components/contactList/page";
+import ChatDetailPanel from "../components/chatDetail/ChatDetailPanel";
+import ContactListPanel from "../components/contactList/ContactListPanel";
 import NavigationPanel from "../components/navigationPanel/page";
-import Chat from "../components/chat/page";
+import ChatPanel from "../components/chat/ChatPanel";
 import "./page.css";
 import { toast } from "sonner";
 import { authService } from "@/services";
+import { ChatProvider } from "@/context/ChatContext";
 
 const ChatJoy = () => {
   const router = useRouter();
@@ -21,12 +22,14 @@ const ChatJoy = () => {
   }, [router]);
 
   return (
-    <div className="chatJoyContainer">
-      <NavigationPanel />
-      <ContactList />
-      <Chat />
-      <ChatDetail />
-    </div>
+    <ChatProvider>
+      <div className="chatJoyContainer">
+        <NavigationPanel />
+        <ContactListPanel />
+        <ChatPanel />
+        <ChatDetailPanel />
+      </div>
+    </ChatProvider>
   );
 };
 
