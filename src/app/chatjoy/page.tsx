@@ -8,13 +8,13 @@ import NavigationPanel from "../components/navigationPanel/page";
 import Chat from "../components/chat/page";
 import "./page.css";
 import { toast } from "sonner";
+import { authService } from "@/services";
 
 const ChatJoy = () => {
   const router = useRouter();
 
   useEffect(() => {
-    const token = localStorage.getItem("token");
-    if (!token) {
+    if (!authService.isAuthenticated()) {
       toast.error("You have to login first!");
       router.push("/");
     }

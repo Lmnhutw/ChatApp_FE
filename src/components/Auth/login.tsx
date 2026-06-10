@@ -3,56 +3,48 @@ import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import "./login.css";
 import { toast, Toaster } from "sonner";
+import { authService, getApiErrorMessage } from "@/services";
 
-type Login = {};
-
-const Login: React.FC<Login> = () => {
+const Login: React.FC = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    const response = await fetch("https://localhost:5000/api/Auth/login", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ email, password }),
+    if (!email.trim() || !password.trim()) {
+      toast.error("Email and password are required.");
+      return;
+    }
+
+    setIsSubmitting(true);
+    const loginPromise = authService.login({
+      email: email.trim(),
+      password,
     });
-    toast.promise(
-      async () => {
-        // Simulate a login process with a delay (replace with your actual login logic)
-        await new Promise((resolve) => setTimeout(resolve, 600)); // Adjust delay as needed
 
-        // Check for successful response status
-        if (response.ok) {
-          return true; // Return true for successful login
-        } else {
-          throw new Error("Login failed"); // Throw an error for failed login
-        }
-      },
-      {
-        loading: "Logging in...",
-        success: () => "Login successful!",
-        error: (error) => {
-          console.error("Login failed:", error);
-          return "Login failed. Please check your email and password.";
-        },
-      }
-    );
+    toast.promise(loginPromise, {
+      loading: "Logging in...",
+      success: "Login successful!",
+      error: (error) =>
+        getApiErrorMessage(
+          error,
+          "Login failed. Please check your email and password."
+        ),
+    });
 
-    if (response.ok) {
-      const data = await response.json();
-      localStorage.setItem("token", data.token);
-      localStorage.setItem("USER_ID", data.user.id);
-      localStorage.setItem("FULL_NAME", data.user.fullName);
+    try {
+      await loginPromise;
       router.push("/chatjoy");
-    } else {
-      console.error("Login failed:", await response.text());
+    } catch (error) {
+      console.error("Login failed:", error);
+    } finally {
+      setIsSubmitting(false);
     }
   };
+
   return (
     <div className="container">
       <h1 className="title">
@@ -81,8 +73,8 @@ const Login: React.FC<Login> = () => {
             placeholder="••••••••"
           />
         </label>
-        <button type="submit" className="button">
-          Login
+        <button type="submit" className="button" disabled={isSubmitting}>
+          {isSubmitting ? "Logging in..." : "Login"}
         </button>
       </form>
       <div className="footer">

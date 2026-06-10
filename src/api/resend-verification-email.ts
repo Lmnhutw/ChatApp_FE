@@ -1,24 +1,27 @@
 // pages/api/auth/resend-verification-email.ts
 
 import { NextApiRequest, NextApiResponse } from 'next';
-import axios from 'axios';
+import { authService, getApiErrorMessage, toApiError } from '@/services';
 
 const resendVerificationEmail = async (req: NextApiRequest, res: NextApiResponse) => {
   if (req.method !== 'POST') {
     return res.status(405).json({ message: 'Method not allowed' });
   }
 
-  const { email } = req.body;
+  const email = typeof req.body?.email === 'string' ? req.body.email : undefined;
+
+  if (!email) {
+    return res.status(400).json({ message: 'Email is required' });
+  }
 
   try {
-    const response = await axios.post('https://localhost:5000/api/Auth/resend-verification-email', { email });
-    return res.status(response.status).json(response.data);
+    const response = await authService.resendVerificationEmail(email);
+    return res.status(200).json(response);
   } catch (error: unknown) {
-    if (axios.isAxiosError(error) && error.response) {
-      return res.status(error.response.status).json({ message: error.response.data.message });
-    } else {
-      return res.status(500).json({ message: 'An unknown error occurred' });
-    }
+    const apiError = toApiError(error);
+    return res.status(apiError.status ?? 500).json({
+      message: getApiErrorMessage(error, 'An unknown error occurred'),
+    });
   }
 };
 

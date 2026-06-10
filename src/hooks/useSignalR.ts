@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
 import { HubConnectionBuilder, LogLevel, HubConnection } from "@microsoft/signalr";
+import { appConfig } from "@/config/env";
+import { getAccessToken } from "@/services/authStorage";
 
 interface Message {
   sender: string;
@@ -15,8 +17,16 @@ const useSignalR = (chatjoy: string, fullname: string) => {
   const [joinError, setJoinError] = useState<string | null>(null);
 
   useEffect(() => {
+    if (!appConfig.signalRHubUrl) {
+      setJoinError("SignalR hub URL is not configured.");
+      return;
+    }
+
     const connect = new HubConnectionBuilder()
-      .withUrl("https://localhost:5000/hub")
+      .withUrl(appConfig.signalRHubUrl, {
+        accessTokenFactory: () => getAccessToken() ?? "",
+      })
+      .withAutomaticReconnect()
       .configureLogging(LogLevel.Information)
       .build();
 
@@ -52,7 +62,10 @@ const useSignalR = (chatjoy: string, fullname: string) => {
         setIsConnected(true);
         setConnection(connect);
       })
-      .catch((error) => console.error("SignalR Connection Error: ", error));
+      .catch((error: unknown) => {
+        console.error("SignalR Connection Error: ", error);
+        setJoinError("Unable to connect to the chat service.");
+      });
 
     return () => {
       connect.stop().then(() => console.log("Disconnected from the SignalR server."));
@@ -66,7 +79,7 @@ const useSignalR = (chatjoy: string, fullname: string) => {
           setJoinError(null);
           console.log("Joined chatjoy successfully");
         })
-        .catch((error: any) => {
+        .catch((error: unknown) => {
           console.error("SignalR JoinRoom Error: ", error);
           setJoinError("Failed to join the chatjoy. Please check the chatjoy Name and try again.");
         });
@@ -96,7 +109,7 @@ const useSignalR = (chatjoy: string, fullname: string) => {
             { ...message, timeStamp: timestamp, displayTime: displayTime }
           ]);
         })
-        .catch((error: any) => console.error("SignalR SendMessage Error: ", error));
+        .catch((error: unknown) => console.error("SignalR SendMessage Error: ", error));
     }
   };
 

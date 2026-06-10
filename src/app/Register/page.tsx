@@ -3,76 +3,75 @@ import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast, Toaster } from "sonner";
 import "./page.css";
+import { authService, getApiErrorMessage } from "@/services";
 
-type RegisterProps = {};
-
-const Register: React.FC<RegisterProps> = () => {
+const Register: React.FC = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [fullName, setFullName] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [isRegistering, setIsRegistering] = useState(false);
   const [message, setMessage] = useState("");
   const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const response = await fetch("https://localhost:5000/api/Auth/register", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ email, password, fullName }),
-    });
 
-    if (response.ok) {
-      response.json().then((data) => {
-        localStorage.setItem("USER_KEY", data.email);
-        toast.success(
-          "Registration successful! Please check your email to verify.",
-          {
-            duration: 5000,
-            position: "top-right",
-          }
-        );
-        setIsModalOpen(true); // Open the modal
+    if (!fullName.trim() || !email.trim() || !password.trim()) {
+      toast.error("Full name, email, and password are required.");
+      return;
+    }
+
+    setIsRegistering(true);
+
+    try {
+      await authService.register({
+        email: email.trim(),
+        password,
+        fullName: fullName.trim(),
       });
-    } else {
-      toast.error("Registration failed", {
+      toast.success(
+        "Registration successful! Please check your email to verify.",
+        {
+          duration: 5000,
+          position: "top-right",
+        }
+      );
+      setIsModalOpen(true);
+    } catch (error) {
+      toast.error(getApiErrorMessage(error, "Registration failed."), {
         duration: 5000,
         position: "top-right",
       });
+    } finally {
+      setIsRegistering(false);
     }
   };
 
   const handleResend = async () => {
     setLoading(true);
     try {
-      const email = localStorage.getItem("USER_KEY");
-      const response = await fetch(
-        `https://localhost:5000/api/Auth/resend-verification-email/${email}`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-        }
-      );
+      const verificationEmail =
+        authService.getPendingVerificationEmail() ?? email.trim();
 
-      if (response.ok) {
-        response.json().then((data) => {
-          setMessage(data.Message);
-          toast.success("Verification email sent successfully!");
-        });
-      } else {
-        setMessage("Error resending verification email.");
-        toast.error("Error resending verification email.");
+      if (!verificationEmail) {
+        throw new Error("No verification email is available.");
       }
+
+      const response = await authService.resendVerificationEmail(verificationEmail);
+      setMessage(response.message ?? response.Message ?? "Verification email sent.");
+      toast.success("Verification email sent successfully!");
     } catch (error) {
-      setMessage("Error resending verification email.");
-      toast.error("Error resending verification email.");
+      const errorMessage = getApiErrorMessage(
+        error,
+        "Error resending verification email."
+      );
+      setMessage(errorMessage);
+      toast.error(errorMessage);
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   const handleCloseModal = () => {
@@ -120,8 +119,8 @@ const Register: React.FC<RegisterProps> = () => {
           />
         </label>
 
-        <button type="submit" className="button">
-          Register
+        <button type="submit" className="button" disabled={isRegistering}>
+          {isRegistering ? "Registering..." : "Register"}
         </button>
       </form>
       <div className="footer">

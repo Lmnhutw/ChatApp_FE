@@ -1,39 +1,39 @@
+"use client";
 /* eslint-disable @next/next/no-img-element */
 import React, { useEffect, useState } from "react";
-import axios from "axios";
 import "./pagePanel.css";
 import userImage from "../../../../public/user.png";
-
-interface User {
-  id: string;
-  email: string;
-  userName: string;
-  fullName: string;
-  profilePic: string;
-}
+import { authService, getApiErrorMessage } from "@/services";
+import { toast } from "sonner";
+import type { UserProfile } from "@/types";
 
 const NavigationPanel: React.FC = () => {
-  const [user, setUser] = useState<User>();
+  const [user, setUser] = useState<UserProfile>();
 
   useEffect(() => {
     const fetchUser = async () => {
-      try {
-        const userId = localStorage.getItem("USER_ID");
-        if (!userId) {
-          throw new Error("User ID not found in local storage.");
-        }
-        const response = await axios.get(
-          `https://localhost:5000/api/Auth/GetUserById/${userId}`
-        );
+      const storedUser = authService.getStoredCurrentUser();
+      if (storedUser) {
+        setUser(storedUser);
+      }
 
-        if (response.status === 200) {
-          console.log(response.data);
-          setUser(response.data);
-        } else {
-          console.error("Failed to fetch user data.");
-        }
+      try {
+        const currentUser = await authService.getCurrentUser();
+        setUser(currentUser);
       } catch (error) {
-        console.error("Error fetching user data:", error);
+        if (!storedUser?.id) {
+          toast.error(getApiErrorMessage(error, "Failed to fetch user data."));
+          return;
+        }
+
+        try {
+          const fallbackUser = await authService.getUserById(storedUser.id);
+          setUser(fallbackUser);
+        } catch (fallbackError) {
+          toast.error(
+            getApiErrorMessage(fallbackError, "Failed to fetch user data.")
+          );
+        }
       }
     };
 

@@ -1,39 +1,33 @@
 "use client";
 import React, { useState } from "react";
-import axios from "axios";
 import { toast, Toaster } from "sonner";
+import { authService, getApiErrorMessage } from "@/services";
 
-interface Props {}
-
-const ResendVerificationPopup: React.FC<Props> = () => {
+const ResendVerificationPopup: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
 
   const handleResend = async () => {
     setLoading(true);
     try {
-      const email = localStorage.getItem("USER_KEY");
+      const email = authService.getPendingVerificationEmail();
       if (!email) {
-        throw new Error("User email not found in local storage.");
+        throw new Error("Verification email is not available.");
       }
 
-      const response = await axios.post(
-        `https://localhost:5000/api/Auth/resend-verification-email/${email}`,
-        {}
-      );
-
-      if (response.status === 200) {
-        setMessage(response.data.Message);
-        toast.success("Verification email sent successfully!");
-      } else {
-        setMessage("Error resending verification email.");
-        toast.error("Error resending verification email.");
-      }
+      const response = await authService.resendVerificationEmail(email);
+      setMessage(response.message ?? response.Message ?? "Verification email sent.");
+      toast.success("Verification email sent successfully!");
     } catch (error) {
-      setMessage("Error resending verification email.");
-      toast.error("Error resending verification email.");
+      const errorMessage = getApiErrorMessage(
+        error,
+        "Error resending verification email."
+      );
+      setMessage(errorMessage);
+      toast.error(errorMessage);
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   return (

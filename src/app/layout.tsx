@@ -8,7 +8,10 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
       <head>
         <title>ChatApp</title>
       </head>
-      <body>{children}</body>
+      <body>
+        {children}
+        <Toaster richColors closeButton />
+      </body>
     </html>
   );
 };

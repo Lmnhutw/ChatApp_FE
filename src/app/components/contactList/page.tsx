@@ -1,34 +1,27 @@
+"use client";
 import { useEffect, useState } from "react";
 import { toast, Toaster } from "sonner";
 import { useSignalR } from "@/hooks/useSignalR";
 import "./page.css";
-import axios from "axios";
+import {
+  authService,
+  getApiErrorMessage,
+  legacyRoomService,
+  type LegacyRoom,
+} from "@/services";
 
-interface Room {
+interface CreateLegacyRoomResponse {
   roomId: number;
-  roomName: string;
-  createdBy: string;
-  userId: string;
-  members: any[];
 }
 
 const ContactList = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [roomName, setRoomName] = useState("");
-  const [rooms, setRooms] = useState<Room[]>([]);
+  const [rooms, setRooms] = useState<LegacyRoom[]>([]);
   const [isJoinModalOpen, setIsJoinModalOpen] = useState(false);
-  const [joinRoomId, setJoinRoomId] = useState<number | null>(null);
   const [joinRoomIdInput, setJoinRoomIdInput] = useState("");
-  const [clickRoom, setClickRoom] = useState("");
-  const [user, setUser] = useState<{
-    id: string;
-    email: string;
-    userName: string;
-    fullName: string;
-    profilePic: string;
-  } | null>(null);
 
-  const { connection, isConnected } = useSignalR("contactList", "CurrentUser");
+  const { connection } = useSignalR("contactList", "CurrentUser");
 
   useEffect(() => {
     fetchRooms();
@@ -36,30 +29,16 @@ const ContactList = () => {
 
   const fetchRooms = async () => {
     try {
-      const response = await fetch(
-        "https://localhost:5000/api/Room/GetRoomList"
-      );
-      if (response.ok) {
-        const data = await response.json();
-        setRooms(data);
-        if (data.length === 0) {
-          toast("No rooms available.", {
-            duration: 5000,
-            position: "top-right",
-          });
-        }
-      } else {
-        toast.error("Failed to fetch rooms.", {
+      const data = await legacyRoomService.getRooms();
+      setRooms(data);
+      if (data.length === 0) {
+        toast("No rooms available.", {
           duration: 5000,
           position: "top-right",
-          action: {
-            label: "x",
-            onClick: () => toast.dismiss(),
-          },
         });
       }
     } catch (error) {
-      toast.error("Failed to fetch rooms.", {
+      toast.error(getApiErrorMessage(error, "Failed to fetch rooms."), {
         duration: 5000,
         position: "top-right",
         action: {
@@ -71,14 +50,13 @@ const ContactList = () => {
   };
 
   const handleAddRoom = async () => {
-    const userId = localStorage.getItem("USER_ID");
-    const fullName = localStorage.getItem("FULL_NAME");
-    if (roomName.trim() && connection && userId && fullName) {
+    const currentUser = authService.getStoredCurrentUser();
+    if (roomName.trim() && connection && currentUser?.id && currentUser.fullName) {
       try {
-        const room = await connection.invoke("CreateRoom", {
+        const room = await connection.invoke<CreateLegacyRoomResponse>("CreateRoom", {
           RoomName: roomName,
-          CreatedBy: fullName,
-          UserId: userId,
+          CreatedBy: currentUser.fullName,
+          UserId: currentUser.id,
         });
         console.log("Server response: ", room);
         if (room && room.roomId) {
@@ -87,8 +65,8 @@ const ContactList = () => {
             {
               roomId: room.roomId,
               roomName,
-              createdBy: fullName,
-              userId,
+              createdBy: currentUser.fullName,
+              userId: currentUser.id,
               members: [],
             },
           ]);
@@ -120,37 +98,18 @@ const ContactList = () => {
     }
   };
   const handleJoinRoom = async () => {
-    const userId = localStorage.getItem("USER_ID");
-    const fullName = localStorage.getItem("FULL_NAME");
+    const currentUser = authService.getStoredCurrentUser();
 
-    const parsedJoinRoomId = parseInt(joinRoomIdInput, 10); // Parse input to integer
+    const parsedJoinRoomId = parseInt(joinRoomIdInput, 10);
 
-    if (parsedJoinRoomId && userId && fullName) {
+    if (parsedJoinRoomId && currentUser?.id && currentUser.fullName) {
       try {
-        const response = await axios.post(
-          "https://localhost:5000/api/Room/JoinRoom",
-          {
-            RoomId: parsedJoinRoomId,
-            FullName: fullName,
-            UserId: userId,
-          }
-        );
-        if (response.status === 200) {
-          toast.success("Joined room successfully!", {
-            duration: 5000,
-            position: "top-right",
-            action: {
-              label: "X",
-              onClick: () => toast.dismiss(),
-            },
-          });
-          setJoinRoomIdInput("");
-          setIsJoinModalOpen(false);
-        } else {
-          throw new Error("Failed to join room");
-        }
-      } catch (error) {
-        toast.error("Failed to join room.", {
+        await legacyRoomService.joinRoom({
+          RoomId: parsedJoinRoomId,
+          FullName: currentUser.fullName,
+          UserId: currentUser.id,
+        });
+        toast.success("Joined room successfully!", {
           duration: 5000,
           position: "top-right",
           action: {
@@ -158,7 +117,17 @@ const ContactList = () => {
             onClick: () => toast.dismiss(),
           },
         });
-        console.error("JoinRoom Error: ", error);
+        setJoinRoomIdInput("");
+        setIsJoinModalOpen(false);
+      } catch (error) {
+        toast.error(getApiErrorMessage(error, "Failed to join room."), {
+          duration: 5000,
+          position: "top-right",
+          action: {
+            label: "X",
+            onClick: () => toast.dismiss(),
+          },
+        });
       }
     }
   };
@@ -185,8 +154,8 @@ const ContactList = () => {
         </button>
       </div>
       {rooms.length > 0 ? (
-        rooms.map((room, index) => (
-          <div key={index} className="contactItem">
+        rooms.map((room) => (
+          <div key={room.roomId} className="contactItem">
             {room.roomName} (ID: {room.roomId})
           </div>
         ))
