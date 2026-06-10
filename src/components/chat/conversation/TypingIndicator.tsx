@@ -1,7 +1,6 @@
 "use client";
 
 import type { TypingChangedEvent } from "@/types";
-import "./conversation.css";
 
 interface TypingIndicatorProps {
   typingUsers: TypingChangedEvent[];

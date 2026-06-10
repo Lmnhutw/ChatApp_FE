@@ -4,7 +4,6 @@ import { useState } from "react";
 import { toast } from "sonner";
 import { getApiErrorMessage } from "@/services";
 import type { Guid, MessageResponse } from "@/types";
-import "./conversation.css";
 
 interface MessageActionsProps {
   message: MessageResponse;

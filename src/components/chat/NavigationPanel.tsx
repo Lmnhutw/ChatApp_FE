@@ -1,14 +1,15 @@
 "use client";
 /* eslint-disable @next/next/no-img-element */
 import React, { useEffect, useState } from "react";
-import "./pagePanel.css";
-import userImage from "../../../../public/user.png";
+import { useRouter } from "next/navigation";
+import userImage from "../../../public/user.png";
 import { authService, getApiErrorMessage } from "@/services";
 import { toast } from "sonner";
 import type { UserProfile } from "@/types";
 
 const NavigationPanel: React.FC = () => {
   const [user, setUser] = useState<UserProfile>();
+  const router = useRouter();
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -40,6 +41,12 @@ const NavigationPanel: React.FC = () => {
     fetchUser();
   }, []);
 
+  const handleLogout = () => {
+    authService.logout();
+    toast.success("Logged out.");
+    router.push("/");
+  };
+
   return (
     <div className="navigationPanelContainer">
       <div className="header__panel">
@@ -55,6 +62,9 @@ const NavigationPanel: React.FC = () => {
         <div className="userProfile">
           <img src={userImage.src} alt="Profile picture" className="avatar" />
           <span>{user.fullName}</span>
+          <button type="button" className="logoutButton" onClick={handleLogout}>
+            Logout
+          </button>
         </div>
       )}
     </div>

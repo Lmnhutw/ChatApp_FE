@@ -4,7 +4,6 @@ import { useState } from "react";
 import { toast } from "sonner";
 import { getApiErrorMessage, userService } from "@/services";
 import type { Guid, UserProfile } from "@/types";
-import "./conversation.css";
 
 interface UserSearchProps {
   label?: string;

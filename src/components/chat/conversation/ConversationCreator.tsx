@@ -6,7 +6,6 @@ import { getApiErrorMessage } from "@/services";
 import { useChatContext } from "@/context/ChatContext";
 import type { Guid, UserProfile } from "@/types";
 import UserSearch from "./UserSearch";
-import "./conversation.css";
 
 interface ConversationCreatorProps {
   mode: "direct" | "group";

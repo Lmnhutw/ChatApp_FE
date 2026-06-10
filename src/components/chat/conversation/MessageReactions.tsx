@@ -1,7 +1,6 @@
 "use client";
 
 import type { MessageReaction } from "@/types";
-import "./conversation.css";
 
 interface MessageReactionsProps {
   reactions: MessageReaction[];

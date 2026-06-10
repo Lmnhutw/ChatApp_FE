@@ -1,7 +1,6 @@
 "use client";
 
 import type { PresenceStatus as PresenceStatusValue } from "@/types";
-import "./conversation.css";
 
 interface PresenceStatusProps {
   status?: PresenceStatusValue;

@@ -116,6 +116,13 @@ export const apiClient = axios.create({
 });
 
 apiClient.interceptors.request.use((config: InternalAxiosRequestConfig) => {
+  if (!appConfig.apiUrl && config.url?.startsWith("/api/")) {
+    throw new ApiClientError({
+      message:
+        "NEXT_PUBLIC_API_URL is not configured. Set it to the backend API base URL.",
+    });
+  }
+
   const token = getAccessToken();
 
   if (token) {

@@ -4,8 +4,7 @@ import { useState } from "react";
 import { Toaster } from "sonner";
 import { useChatContext } from "@/context/ChatContext";
 import type { ConversationResponse } from "@/types";
-import ConversationCreator from "../conversation/ConversationCreator";
-import "./page.css";
+import ConversationCreator from "./conversation/ConversationCreator";
 
 const getConversationTitle = (conversation: ConversationResponse): string => {
   const memberNames = conversation.members

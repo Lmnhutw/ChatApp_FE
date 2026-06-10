@@ -7,7 +7,6 @@ import { useChatContext } from "@/context/ChatContext";
 import type { Guid, UserProfile } from "@/types";
 import PresenceStatus from "./PresenceStatus";
 import UserSearch from "./UserSearch";
-import "./conversation.css";
 
 const MemberManagement = () => {
   const {

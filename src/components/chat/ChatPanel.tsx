@@ -4,11 +4,10 @@ import React, { useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 import { useChatContext } from "@/context/ChatContext";
 import { getApiErrorMessage } from "@/services";
-import MessageActions from "../conversation/MessageActions";
-import MessageReactions from "../conversation/MessageReactions";
-import ReadReceiptIndicator from "../conversation/ReadReceiptIndicator";
-import TypingIndicator from "../conversation/TypingIndicator";
-import "./page.css";
+import MessageActions from "./conversation/MessageActions";
+import MessageReactions from "./conversation/MessageReactions";
+import ReadReceiptIndicator from "./conversation/ReadReceiptIndicator";
+import TypingIndicator from "./conversation/TypingIndicator";
 
 const formatMessageTime = (timestamp: string): string =>
   new Date(timestamp).toLocaleTimeString("en-US", {

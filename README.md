@@ -1,54 +1,153 @@
-### README
+# ChatApp Frontend
 
-# Real-Time Chat Frontend
-
-## Description
-This project is a real-time chat application frontend built with [Next.js](https://nextjs.org/) and utilizes [SignalR](https://dotnet.microsoft.com/en-us/apps/aspnet/signalr) for real-time communication. It serves as the front-end part of the ChatApp project, complementing the backend service [ChatApp_BE](https://github.com/Lmnhutw/ChatApp_BE) which handles user authentication, message routing, and storage.
+Next.js + React + TypeScript frontend for the ChatApp backend. The app is now built around production conversation-based chat: JWT authentication, GUID conversation IDs, REST service modules, and SignalR conversation events.
 
 ## Features
-- Real-time messaging with SignalR
-- User-friendly interface built with Next.js
-- Responsive design for mobile and desktop
+
+- JWT login, registration, email verification resend, auth check, and logout.
+- Centralized API client with environment-based base URL, Bearer token injection, error parsing, and 401 cleanup.
+- Typed service layer for auth, conversations, messages, users, reactions, and attachments.
+- Conversation-based chat state through React Context.
+- SignalR connection with JWT auth and automatic reconnect.
+- Conversation list, direct/group creation, user search, message send/edit/delete, reactions, typing indicators, read receipts, presence, member management, and user blocking controls.
+
+## Requirements
+
+- Node.js compatible with Next.js 14.
+- npm.
+- ChatApp backend running with the expected REST and SignalR endpoints.
+
+## Environment
+
+Create `.env.local` from `.env.example`:
+
+```bash
+NEXT_PUBLIC_API_URL=https://your-backend-host
+NEXT_PUBLIC_SIGNALR_HUB_URL=https://your-backend-host/hub
+```
+
+Do not hardcode backend URLs in components. All backend access should go through `src/services`.
 
 ## Getting Started
-To start the development server, run one of the following commands:
+
+Install dependencies:
+
+```bash
+npm ci
+```
+
+Start the development server:
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Once the server is running, open [http://localhost:3000](http://localhost:3000) in your browser to access the chat application.
+Open [http://localhost:3000](http://localhost:3000).
 
-### Development
-You can modify the project by editing the `app/page.tsx` file. Any changes made will automatically update in the browser.
+## Scripts
 
-This project leverages [`next/font`](https://nextjs.org/docs/basic-features/font-optimization) for optimized font loading, specifically the Inter font.
+```bash
+npm run dev
+npm run lint
+npm run build
+npm run start
+```
 
-## Real-Time Communication with SignalR
-This frontend connects to a SignalR backend to enable real-time chat functionality. Ensure that the backend server is running and properly configured to handle WebSocket connections.
+## Architecture
 
-## Additional Resources
-For more information about Next.js and SignalR, explore the following resources:
+```text
+src/
+  app/
+    chatjoy/              Main chat route and chat-specific global CSS
+    Register/             Registration and verification UI
+  components/
+    Auth/                 Login UI
+    chat/                 Chat panels and conversation UI components
+  context/
+    ChatContext.tsx       Current user, conversations, messages, presence, typing, blocked users
+  hooks/
+    useSignalR.ts         Typed SignalR connection/events/methods
+  services/
+    apiClient.ts          Shared axios client, auth header, error handling
+    authService.ts        Auth workflows and token helpers
+    conversationService.ts
+    messageService.ts
+    userService.ts
+    reactionService.ts
+    attachmentService.ts
+  types/
+    dtos.ts               Backend DTOs and realtime event contracts
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - Learn about the framework’s features and API.
-- [Next.js Interactive Tutorial](https://nextjs.org/learn) - A step-by-step guide to mastering Next.js.
-- [SignalR Documentation](https://dotnet.microsoft.com/en-us/apps/aspnet/signalr) - Learn about real-time communication with SignalR.
+## Backend Contract
 
-## Deployment
-The simplest way to deploy your Next.js chat application is via [Vercel](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app).
+The frontend assumes these API areas exist:
 
-Refer to the [Next.js deployment documentation](https://nextjs.org/docs/deployment) for detailed instructions on deploying your app.
+- `POST /api/Auth/login`
+- `POST /api/Auth/register`
+- `GET /api/Auth/me`
+- `POST /api/Auth/resend-verification-email/{email}`
+- `/api/Conversations`
+- `/api/Conversations/direct`
+- `/api/Conversations/group`
+- `/api/Conversations/{conversationId}/messages`
+- `/api/Messages/{messageId}`
+- `/api/Messages/{messageId}/read`
+- `/api/Messages/{messageId}/reactions`
+- `/api/Users/search?query=...`
+- `/api/Users/blocks`
+- `/api/Attachments`
 
-## Contributing
-Contributions are welcome! Please fork the repository and create a pull request with your changes.
+SignalR hub methods used by the frontend:
 
-## License
-This project does not have a license specified.
+- `JoinConversation`
+- `LeaveConversation`
+- `SendConversationMessage`
+- `SendTyping`
+- `MarkMessageRead`
+- `AddReaction`
+- `RemoveReaction`
 
----
+SignalR events handled by the frontend:
+
+- `MessageReceived`
+- `MessageUpdated`
+- `MessageDeleted`
+- `TypingChanged`
+- `MessageRead`
+- `MessageReactionAdded`
+- `MessageReactionRemoved`
+- `PresenceChanged`
+- `RealtimeError`
+
+## Development Rules
+
+- Keep backend URLs in `.env.local`.
+- Do not call `fetch` or `axios` directly from UI components.
+- Do not read or write `localStorage` directly from UI components.
+- Add shared backend contracts to `src/types/dtos.ts`.
+- Add backend calls through focused service modules in `src/services`.
+- Keep reusable UI components outside `src/app` unless they are route files.
+
+## Verification
+
+Run before handoff:
+
+```bash
+npm run lint
+npm run build
+```
+
+Useful source checks:
+
+```bash
+rg "https://localhost:5000|http://localhost:5000" src
+rg "JoinRoom|LeaveRoom|\"SendMessage\"|/api/Room" src
+rg "localStorage" src --glob "!src/services/authStorage.ts"
+```
+
+## Notes
+
+- The app uses `sonner` for toast messages.
+- If `NEXT_PUBLIC_API_URL` is missing, authenticated API calls fail fast with a configuration error.
+- The chat UI is available at `/chatjoy` after login.

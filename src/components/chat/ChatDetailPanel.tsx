@@ -2,8 +2,7 @@
 
 import React from "react";
 import { useChatContext } from "@/context/ChatContext";
-import MemberManagement from "../conversation/MemberManagement";
-import "./page.css";
+import MemberManagement from "./conversation/MemberManagement";
 
 const ChatDetailPanel = () => {
   const { selectedConversation } = useChatContext();

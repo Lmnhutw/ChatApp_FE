@@ -424,6 +424,10 @@ export const ChatProvider = ({ children }: { children: ReactNode }) => {
       const currentUser = await authService.getCurrentUser();
       dispatch({ type: "SET_CURRENT_USER", user: currentUser });
     } catch (error) {
+      if (!authService.isAuthenticated()) {
+        dispatch({ type: "SET_CURRENT_USER", user: null });
+      }
+
       dispatch({ type: "SET_ERROR", error: getApiErrorMessage(error) });
     }
   }, []);

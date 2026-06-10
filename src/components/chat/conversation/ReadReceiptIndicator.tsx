@@ -1,7 +1,6 @@
 "use client";
 
 import type { MessageResponse } from "@/types";
-import "./conversation.css";
 
 interface ReadReceiptIndicatorProps {
   message: MessageResponse;
